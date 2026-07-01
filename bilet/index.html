@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>AvtoTest Bilet — Nazariya testi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#08070b;
+  --bg2:#0d0b10;
+  --panel:rgba(14,22,38,.55);
+  --panel-2:rgba(10,16,28,.7);
+  --cyan:#f2c75b;
+  --cyan-soft:#ffe8a3;
+  --magenta:#c9882c;
+  --green:#3ddc84;
+  --green-soft:#b9ffd8;
+  --amber:#ffc24b;
+  --red:#ff3b5c;
+  --text:#f4eee6;
+  --muted:#9c907c;
+  --border:rgba(242,199,91,.22);
+  --glow-cyan:0 0 18px rgba(242,199,91,.55);
+  --glow-mag:0 0 18px rgba(201,136,44,.5);
+  --glow-green:0 0 20px rgba(61,220,132,.55);
+  --glow-red:0 0 20px rgba(255,59,92,.55);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Rajdhani',sans-serif;
+  overflow-x:hidden;
+  line-height:1.4;
+  min-height:100vh;
+}
+::selection{background:var(--cyan);color:#04121a}
+.display{font-family:'Orbitron',sans-serif;letter-spacing:.02em}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit}
+
+.bg-fx{position:fixed;inset:0;z-index:-2;background:
+  radial-gradient(1200px 700px at 80% -10%, rgba(201,136,44,.14), transparent 60%),
+  radial-gradient(1000px 700px at 10% 110%, rgba(242,199,91,.16), transparent 60%),
+  linear-gradient(180deg,var(--bg),var(--bg2));}
+.stars{position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:
+    radial-gradient(1.4px 1.4px at 20% 30%, rgba(255,255,255,.5), transparent),
+    radial-gradient(1.2px 1.2px at 70% 60%, rgba(242,199,91,.6), transparent),
+    radial-gradient(1.6px 1.6px at 40% 80%, rgba(201,136,44,.45), transparent),
+    radial-gradient(1.2px 1.2px at 90% 20%, rgba(255,255,255,.4), transparent),
+    radial-gradient(1.3px 1.3px at 55% 15%, rgba(242,199,91,.5), transparent);
+  background-size:600px 600px,500px 500px,700px 700px,400px 400px,650px 650px;
+  opacity:.7;animation:twinkle 6s ease-in-out infinite alternate;}
+@keyframes twinkle{from{opacity:.45}to{opacity:.85}}
+
+.wrap{max-width:640px;margin:0 auto;padding:18px 16px 60px;min-height:100vh;display:flex;flex-direction:column}
+
+/* top bar */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:6px 2px 20px}
+.logo{display:flex;align-items:center;gap:9px;font-family:'Orbitron';font-weight:800;font-size:18px}
+.logo .mark{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--cyan),var(--magenta));box-shadow:var(--glow-cyan);color:#04121a;font-size:15px}
+.logo b{background:linear-gradient(90deg,var(--cyan),var(--cyan-soft));-webkit-background-clip:text;background-clip:text;color:transparent}
+.icon-btn{width:38px;height:38px;border-radius:50%;border:1px solid var(--border);background:transparent;
+  color:var(--text);display:grid;place-items:center;font-size:16px;cursor:pointer;transition:.2s}
+.icon-btn:hover{border-color:var(--cyan);box-shadow:var(--glow-cyan)}
+
+/* glass */
+.glass{background:var(--panel);border:1px solid var(--border);border-radius:20px;
+  backdrop-filter:blur(14px);position:relative;overflow:hidden}
+.glass::before{content:"";position:absolute;inset:0;border-radius:20px;padding:1px;
+  background:linear-gradient(135deg,rgba(242,199,91,.5),transparent 40%,transparent 60%,rgba(201,136,44,.4));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;opacity:.8}
+
+/* ===== VIEWS ===== */
+.view{display:none;flex-direction:column;gap:16px;flex:1}
+.view.active{display:flex}
+
+/* ---- HOME ---- */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.stat{padding:16px 8px;text-align:center}
+.stat .num{font-family:'Orbitron';font-weight:900;font-size:clamp(18px,5vw,26px);
+  background:linear-gradient(90deg,var(--cyan),var(--cyan-soft));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat .lbl{color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-size:10.5px;margin-top:4px;font-weight:600}
+@media(max-width:380px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+.menu-title{color:var(--muted);text-transform:uppercase;letter-spacing:.25em;font-size:11px;font-weight:700;margin:10px 2px 0}
+
+.big-btn{display:flex;align-items:center;gap:16px;padding:18px 20px;cursor:pointer;transition:.2s;text-align:left}
+.big-btn:active{transform:scale(.98)}
+.big-btn:hover{border-color:var(--cyan);box-shadow:var(--glow-cyan)}
+.big-btn .ic{width:46px;height:46px;flex:none;border-radius:13px;display:grid;place-items:center;font-size:21px;
+  background:linear-gradient(135deg,rgba(242,199,91,.2),rgba(201,136,44,.16));border:1px solid var(--border)}
+.big-btn .body{flex:1;min-width:0}
+.big-btn .t{font-family:'Orbitron';font-weight:700;font-size:15.5px}
+.big-btn .s{color:var(--muted);font-size:13.5px;margin-top:2px}
+.big-btn .chev{color:var(--muted);font-size:20px}
+.big-btn.primary{background:linear-gradient(120deg,rgba(242,199,91,.14),rgba(201,136,44,.08));border-color:rgba(242,199,91,.4)}
+
+.bilet-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.bilet-btn{padding:16px 6px;text-align:center;cursor:pointer;transition:.2s}
+.bilet-btn:hover{border-color:var(--cyan);box-shadow:var(--glow-cyan)}
+.bilet-btn:active{transform:scale(.96)}
+.bilet-btn .n{font-family:'Orbitron';font-weight:900;font-size:22px;color:var(--cyan-soft)}
+.bilet-btn .l{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
+
+.ghost-link{color:var(--muted);font-size:13.5px;text-align:center;margin-top:6px;text-decoration:underline;
+  text-underline-offset:3px;cursor:pointer}
+.ghost-link:hover{color:var(--text)}
+
+/* ---- QUIZ ---- */
+.quiz-top{display:flex;align-items:center;gap:12px}
+.quiz-top .badge{font-family:'Orbitron';font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--muted);
+  border:1px solid var(--border);border-radius:20px;padding:5px 12px;white-space:nowrap}
+.quiz-top .pos{flex:1;text-align:right;font-family:'Orbitron';font-weight:700;font-size:13px;color:var(--cyan-soft)}
+.progress-track{height:6px;border-radius:6px;background:rgba(255,255,255,.06);overflow:hidden}
+.progress-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--cyan),var(--magenta));
+  box-shadow:0 0 10px rgba(242,199,91,.5);transition:width .35s ease}
+
+.q-image-wrap{border-radius:18px;overflow:hidden;border:1px solid var(--border);background:#000;
+  aspect-ratio:16/10;display:grid;place-items:center}
+.q-image-wrap img{width:100%;height:100%;object-fit:contain;display:block}
+.q-image-wrap.hidden{display:none}
+
+.q-text{font-size:clamp(17px,4.4vw,20px);font-weight:600;line-height:1.35;padding:2px 2px}
+
+.answers{display:flex;flex-direction:column;gap:10px}
+.ans-card{display:flex;align-items:center;gap:14px;padding:15px 16px;cursor:pointer;transition:.18s;
+  border-width:1.5px}
+.ans-card:active{transform:scale(.985)}
+.ans-card .letter{width:32px;height:32px;flex:none;border-radius:9px;display:grid;place-items:center;
+  font-family:'Orbitron';font-weight:700;font-size:13px;border:1px solid var(--border);color:var(--muted);transition:.18s}
+.ans-card .atext{flex:1;font-size:15.5px;font-weight:500;line-height:1.3}
+.ans-card .mark{flex:none;font-size:19px;opacity:0;transform:scale(.5);transition:.2s}
+
+.ans-card.locked{cursor:default}
+.ans-card.locked:active{transform:none}
+.ans-card.correct{border-color:var(--green);box-shadow:var(--glow-green);background:rgba(61,220,132,.08)}
+.ans-card.correct .letter{background:var(--green);color:#04210f;border-color:var(--green)}
+.ans-card.correct .mark{opacity:1;transform:scale(1);color:var(--green)}
+.ans-card.wrong{border-color:var(--red);box-shadow:var(--glow-red);background:rgba(255,59,92,.08)}
+.ans-card.wrong .letter{background:var(--red);color:#2a020a;border-color:var(--red)}
+.ans-card.wrong .mark{opacity:1;transform:scale(1);color:var(--red)}
+.ans-card.dim{opacity:.4}
+
+.explain{max-height:0;opacity:0;overflow:hidden;transition:max-height .4s ease,opacity .3s ease,margin-top .4s ease}
+.explain.show{max-height:400px;opacity:1;margin-top:2px}
+.explain-inner{padding:14px 16px;font-size:13.5px;color:var(--muted);line-height:1.5;display:flex;gap:10px}
+.explain-inner .ii{flex:none;color:var(--cyan)}
+
+.next-zone{display:flex;align-items:center;gap:12px;margin-top:2px}
+.next-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:10px;padding:15px;border:none;
+  border-radius:16px;cursor:pointer;font-family:'Orbitron';font-weight:700;letter-spacing:.05em;font-size:13.5px;
+  color:#04121a;background:linear-gradient(90deg,var(--cyan),var(--cyan-soft));
+  box-shadow:0 0 20px rgba(242,199,91,.5);position:relative;overflow:hidden;opacity:0;transform:translateY(8px);
+  transition:opacity .3s ease,transform .3s ease}
+.next-btn.show{opacity:1;transform:translateY(0)}
+.next-fill{position:absolute;left:0;top:0;bottom:0;background:rgba(4,18,26,.22);width:0%}
+
+/* ---- RESULT ---- */
+.result-hero{padding:34px 24px;text-align:center}
+.result-hero .rk{color:var(--muted);text-transform:uppercase;letter-spacing:.3em;font-size:11px;font-weight:700}
+.result-hero .pct{font-family:'Orbitron';font-weight:900;font-size:clamp(50px,16vw,72px);margin:10px 0;
+  background:linear-gradient(90deg,var(--cyan),var(--cyan-soft));-webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 0 40px rgba(242,199,91,.25)}
+.result-hero .msg{font-size:16px;color:var(--text);font-weight:600}
+.result-split{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rsplit{padding:18px;text-align:center}
+.rsplit .n{font-family:'Orbitron';font-weight:800;font-size:26px}
+.rsplit.ok .n{color:var(--green)}
+.rsplit.bad .n{color:var(--red)}
+.rsplit .l{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.1em;margin-top:4px}
+
+/* confirm sheet */
+.overlay{position:fixed;inset:0;background:rgba(4,4,8,.72);backdrop-filter:blur(4px);z-index:80;
+  display:none;align-items:flex-end;justify-content:center}
+.overlay.show{display:flex}
+.sheet{width:100%;max-width:640px;padding:22px 20px 28px;border-radius:24px 24px 0 0;
+  background:var(--bg2);border:1px solid var(--border);border-bottom:none}
+.sheet h3{font-family:'Orbitron';font-size:16px;margin-bottom:8px}
+.sheet p{color:var(--muted);font-size:14px;margin-bottom:18px}
+.sheet .row{display:flex;gap:10px}
+.sheet button{flex:1;padding:13px;border-radius:14px;border:1px solid var(--border);background:transparent;
+  color:var(--text);font-weight:700;cursor:pointer;font-size:14px}
+.sheet button.danger{background:linear-gradient(90deg,var(--red),#ff6b8a);border:none;color:#2a020a}
+
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;flex:1;color:var(--muted)}
+.spin{width:34px;height:34px;border-radius:50%;border:3px solid rgba(242,199,91,.2);border-top-color:var(--cyan);
+  animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+footer{text-align:center;padding:24px 10px 4px;color:var(--muted);font-size:12px}
+footer b{color:var(--cyan)}
+
+/* ---- LOCK SCREEN ---- */
+#lockScreen{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,var(--bg),var(--bg2));padding:20px}
+#lockScreen.hidden{display:none}
+.lock-card{width:100%;max-width:320px;padding:34px 28px;text-align:center}
+.lock-card .lk{width:52px;height:52px;border-radius:16px;margin:0 auto 18px;display:grid;place-items:center;
+  font-size:24px;background:linear-gradient(135deg,rgba(242,199,91,.2),rgba(201,136,44,.16));border:1px solid var(--border)}
+.lock-card h2{font-family:'Orbitron';font-size:17px;margin-bottom:6px}
+.lock-card p{color:var(--muted);font-size:13.5px;margin-bottom:20px}
+#pinInput{width:100%;text-align:center;letter-spacing:.6em;font-family:'Orbitron';font-size:24px;font-weight:700;
+  background:rgba(255,255,255,.04);border:1.5px solid var(--border);border-radius:14px;color:var(--text);
+  padding:14px 10px 14px 18px;outline:none;transition:.2s}
+#pinInput:focus{border-color:var(--cyan);box-shadow:var(--glow-cyan)}
+#pinInput.shake{animation:shake .35s}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.lock-err{color:var(--red);font-size:12.5px;margin-top:10px;min-height:16px}
+#pinSubmit{margin-top:16px;width:100%;padding:13px;border:none;border-radius:14px;cursor:pointer;
+  font-family:'Orbitron';font-weight:700;letter-spacing:.05em;font-size:13.5px;color:#04121a;
+  background:linear-gradient(90deg,var(--cyan),var(--cyan-soft));box-shadow:0 0 18px rgba(242,199,91,.45)}
+</style>
+</head>
+<body>
+<div class="bg-fx"></div>
+<div class="stars"></div>
+
+<div id="lockScreen">
+  <div class="lock-card glass">
+    <div class="lk">🔒</div>
+    <h2>Kirish kodi</h2>
+    <p>Davom etish uchun 4 xonali kodni kiriting</p>
+    <input id="pinInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="••••" />
+    <div class="lock-err" id="pinErr"></div>
+    <button id="pinSubmit">Kirish</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="logo"><span class="mark">⚡</span><span>AVTO<b>TEST</b> · BILET</span></div>
+    <button class="icon-btn" id="btnMenuIcon" title="Menyu">☰</button>
+  </div>
+
+  <div id="loading" class="loading">
+    <div class="spin"></div>
+    <div>Savollar yuklanmoqda…</div>
+  </div>
+
+  <!-- HOME -->
+  <div id="view-home" class="view">
+    <div class="stats glass">
+      <div class="stat"><div class="num" id="statTotal">0</div><div class="lbl">Jami savol</div></div>
+      <div class="stat"><div class="num" id="statDone">0</div><div class="lbl">Ishlangan</div></div>
+      <div class="stat"><div class="num" id="statCorrect">0</div><div class="lbl">To'g'ri</div></div>
+      <div class="stat"><div class="num" id="statWrong">0</div><div class="lbl">Xato</div></div>
+    </div>
+
+    <div class="menu-title">Ketma-ket mashq</div>
+    <div class="big-btn glass primary" id="btnSeq">
+      <div class="ic">🎯</div>
+      <div class="body">
+        <div class="t" id="seqTitle">Testni boshlash</div>
+        <div class="s" id="seqSub">Barcha 1623 savol, ketma-ket</div>
+      </div>
+      <div class="chev">›</div>
+    </div>
+
+    <div class="big-btn glass" id="btnReview" style="display:none">
+      <div class="ic">🔁</div>
+      <div class="body">
+        <div class="t">Xatolarni takrorlash</div>
+        <div class="s" id="reviewSub">0 ta savol</div>
+      </div>
+      <div class="chev">›</div>
+    </div>
+
+    <div class="menu-title">Aralash bilet</div>
+    <div class="bilet-row">
+      <div class="bilet-btn glass" data-size="20"><div class="n">20</div><div class="l">savol</div></div>
+      <div class="bilet-btn glass" data-size="50"><div class="n">50</div><div class="l">savol</div></div>
+      <div class="bilet-btn glass" data-size="100"><div class="n">100</div><div class="l">savol</div></div>
+    </div>
+
+    <div class="ghost-link" id="btnReset">Progressni tozalab, boshidan boshlash</div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="view-quiz" class="view">
+    <div class="quiz-top">
+      <div class="badge" id="quizBadge">BILET</div>
+      <div class="progress-track" style="flex:1"><div class="progress-fill" id="quizProgress" style="width:0%"></div></div>
+      <div class="pos" id="quizPos">1/20</div>
+    </div>
+
+    <div class="q-image-wrap glass hidden" id="qImageWrap">
+      <img id="qImage" src="" alt="savol rasmi" loading="lazy" />
+    </div>
+
+    <div class="q-text" id="qText"></div>
+
+    <div class="answers" id="answers"></div>
+
+    <div class="explain glass" id="explain"><div class="explain-inner"><span class="ii">ℹ️</span><span id="explainText"></span></div></div>
+
+    <div class="next-zone">
+      <button class="next-btn" id="nextBtn"><div class="next-fill" id="nextFill"></div><span id="nextLabel">Keyingi savol ⏭</span></button>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="view-result" class="view">
+    <div class="result-hero glass">
+      <div class="rk">Natija</div>
+      <div class="pct" id="resPct">0%</div>
+      <div class="msg" id="resMsg">Ajoyib!</div>
+    </div>
+    <div class="result-split">
+      <div class="rsplit glass ok"><div class="n" id="resCorrect">0</div><div class="l">To'g'ri</div></div>
+      <div class="rsplit glass bad"><div class="n" id="resWrong">0</div><div class="l">Xato</div></div>
+    </div>
+    <div class="big-btn glass primary" id="btnResultMenu">
+      <div class="ic">🏠</div>
+      <div class="body"><div class="t">Menyuga qaytish</div><div class="s">Yangi bilet yoki mashq tanla</div></div>
+      <div class="chev">›</div>
+    </div>
+  </div>
+
+  <footer>© 2026 <b>AVTOTEST</b> BILET — mashq uchun norasmiy vosita.</footer>
+</div>
+
+<div class="overlay" id="resetOverlay">
+  <div class="sheet glass">
+    <h3>Boshidan boshlaymizmi?</h3>
+    <p>Ketma-ket test progressi, to'g'ri/xato hisob va xatolar ro'yxati tozalanadi. Bu ortga qaytarilmaydi.</p>
+    <div class="row">
+      <button id="resetCancel">Bekor qilish</button>
+      <button class="danger" id="resetConfirm">Ha, tozala</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const LETTERS = 'ABCDEFGH';
+const STORE_KEY = 'avtotest_bilet_state_v1';
+let QUESTIONS = [];
+let BY_ID = {};
+let state = null;
+
+let current = { mode:null, order:[], pos:0, correct:0, wrong:0 }; // active session buffer
+let answered = false;
+let advanceTimer = null;
+
+function loadState(){
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return { seqOrder:null, seqIdx:0, correct:0, wrong:0, wrongIds:[] };
+}
+function saveState(){ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+
+function shuffledIds(n){
+  const ids = QUESTIONS.map(q=>q.id);
+  for (let i=ids.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [ids[i],ids[j]]=[ids[j],ids[i]]; }
+  return ids.slice(0, Math.min(n, ids.length));
+}
+
+function show(viewId){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(viewId).classList.add('active');
+}
+
+function renderHome(){
+  const total = QUESTIONS.length;
+  const done = state.correct + state.wrong;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statDone').textContent = done;
+  document.getElementById('statCorrect').textContent = state.correct;
+  document.getElementById('statWrong').textContent = state.wrong;
+
+  const seqIdx = state.seqIdx || 0;
+  document.getElementById('seqTitle').textContent = seqIdx > 0 ? 'Testni davom ettirish' : 'Testni boshlash';
+  document.getElementById('seqSub').textContent = seqIdx > 0
+    ? `${seqIdx} / ${total} savol o'tildi`
+    : `Barcha ${total} savol, ketma-ket`;
+
+  const wc = (state.wrongIds||[]).length;
+  const rb = document.getElementById('btnReview');
+  if (wc > 0) {
+    rb.style.display = 'flex';
+    document.getElementById('reviewSub').textContent = `${wc} ta savol`;
+  } else {
+    rb.style.display = 'none';
+  }
+  show('view-home');
+}
+
+function startSeq(){
+  if (!state.seqOrder) state.seqOrder = QUESTIONS.map(q=>q.id);
+  current = { mode:'seq', order: state.seqOrder, pos: state.seqIdx||0, correct:0, wrong:0 };
+  nextQuestion();
+}
+function startReview(){
+  const ids = (state.wrongIds||[]).slice();
+  if (!ids.length) return renderHome();
+  current = { mode:'review', order: ids, pos:0, correct:0, wrong:0 };
+  nextQuestion();
+}
+function startBilet(size){
+  current = { mode:'bilet', order: shuffledIds(size), pos:0, correct:0, wrong:0 };
+  nextQuestion();
+}
+
+function finishSession(){
+  if (current.mode === 'seq' || current.mode === 'review') {
+    saveState();
+    show('view-home');
+    renderHome();
+    return;
+  }
+  // bilet -> show result screen
+  const total = current.correct + current.wrong;
+  const pct = total ? Math.round((current.correct/total)*100) : 0;
+  document.getElementById('resPct').textContent = pct + '%';
+  document.getElementById('resCorrect').textContent = current.correct;
+  document.getElementById('resWrong').textContent = current.wrong;
+  let msg = 'Yana mashq qiling!';
+  if (pct >= 95) msg = "A'lo! Imtihonga tayyorsiz 🏆";
+  else if (pct >= 80) msg = 'Zo\'r natija! 💪';
+  else if (pct >= 60) msg = 'Yomon emas, davom eting';
+  document.getElementById('resMsg').textContent = msg;
+  saveState();
+  show('view-result');
+}
+
+function nextQuestion(){
+  answered = false;
+  clearTimeout(advanceTimer);
+
+  if (current.pos >= current.order.length) return finishSession();
+
+  const q = BY_ID[current.order[current.pos]];
+  const total = current.order.length;
+
+  const badgeText = current.mode === 'seq' ? 'KETMA-KET'
+    : current.mode === 'review' ? 'XATOLAR'
+    : `BILET ${total}`;
+  document.getElementById('quizBadge').textContent = badgeText;
+  document.getElementById('quizPos').textContent = `${current.pos+1}/${total}`;
+  document.getElementById('quizProgress').style.width = `${(current.pos/total)*100}%`;
+
+  const imgWrap = document.getElementById('qImageWrap');
+  const img = document.getElementById('qImage');
+  if (q.image) {
+    img.onerror = () => imgWrap.classList.add('hidden');
+    img.onload = () => imgWrap.classList.remove('hidden');
+    img.src = q.image;
+    imgWrap.classList.remove('hidden');
+  } else {
+    imgWrap.classList.add('hidden');
+    img.src = '';
+  }
+
+  document.getElementById('qText').textContent = q.text;
+
+  const answersEl = document.getElementById('answers');
+  answersEl.innerHTML = '';
+  q.answers.forEach((a, i) => {
+    const card = document.createElement('div');
+    card.className = 'ans-card glass';
+    card.innerHTML = `<div class="letter">${LETTERS[i]}</div><div class="atext">${a.text}</div><div class="mark"></div>`;
+    card.addEventListener('click', () => selectAnswer(q, a.id, card));
+    answersEl.appendChild(card);
+  });
+
+  document.getElementById('explain').classList.remove('show');
+  document.getElementById('explainText').textContent = q.explanation || '';
+  const nb = document.getElementById('nextBtn');
+  nb.classList.remove('show');
+  document.getElementById('nextFill').style.width = '0%';
+
+  show('view-quiz');
+}
+
+function selectAnswer(q, ansId, cardEl){
+  if (answered) return;
+  answered = true;
+  const isCorrect = ansId === q.correct_id;
+
+  const cards = Array.from(document.getElementById('answers').children);
+  cards.forEach((c, i) => {
+    c.classList.add('locked');
+    const a = q.answers[i];
+    if (a.id === q.correct_id) c.classList.add('correct');
+    else if (a.id === ansId) c.classList.add('wrong');
+    else c.classList.add('dim');
+  });
+
+  if (q.explanation) document.getElementById('explain').classList.add('show');
+
+  const wrongIds = state.wrongIds || (state.wrongIds = []);
+  if (isCorrect) {
+    current.correct++;
+    if (current.mode !== 'bilet') state.correct++;
+    if (current.mode === 'review') {
+      const idx = wrongIds.indexOf(q.id);
+      if (idx !== -1) wrongIds.splice(idx, 1);
+    }
+  } else {
+    current.wrong++;
+    if (current.mode !== 'bilet') state.wrong++;
+    if (!wrongIds.includes(q.id)) wrongIds.push(q.id);
+  }
+
+  if (current.mode === 'seq') state.seqIdx = current.pos + 1;
+  saveState();
+
+  const nb = document.getElementById('nextBtn');
+  const nf = document.getElementById('nextFill');
+  document.getElementById('nextLabel').textContent = 'Keyingi savol ⏭';
+  nb.classList.add('show');
+  nf.style.width = '0%';
+  requestAnimationFrame(() => { nf.style.transition = 'width 2s linear'; nf.style.width = '100%'; });
+
+  const advance = () => { current.pos++; nextQuestion(); };
+  nb.onclick = () => { clearTimeout(advanceTimer); nf.style.transition='none'; advance(); };
+  advanceTimer = setTimeout(advance, 2000);
+}
+
+// ---- wiring ----
+document.getElementById('btnSeq').addEventListener('click', startSeq);
+document.getElementById('btnReview').addEventListener('click', startReview);
+document.querySelectorAll('.bilet-btn').forEach(b=>{
+  b.addEventListener('click', () => startBilet(parseInt(b.dataset.size,10)));
+});
+document.getElementById('btnResultMenu').addEventListener('click', renderHome);
+document.getElementById('btnMenuIcon').addEventListener('click', () => {
+  clearTimeout(advanceTimer);
+  renderHome();
+});
+
+const resetOverlay = document.getElementById('resetOverlay');
+document.getElementById('btnReset').addEventListener('click', () => resetOverlay.classList.add('show'));
+document.getElementById('resetCancel').addEventListener('click', () => resetOverlay.classList.remove('show'));
+document.getElementById('resetConfirm').addEventListener('click', () => {
+  state = { seqOrder:null, seqIdx:0, correct:0, wrong:0, wrongIds:[] };
+  saveState();
+  resetOverlay.classList.remove('show');
+  renderHome();
+});
+
+// ---- boot ----
+function boot(){
+  fetch('questions.json').then(r=>r.json()).then(data => {
+    QUESTIONS = data;
+    BY_ID = {}; QUESTIONS.forEach(q => BY_ID[q.id] = q);
+    state = loadState();
+    document.getElementById('loading').style.display = 'none';
+    renderHome();
+  }).catch(err => {
+    document.getElementById('loading').innerHTML = '<div>Savollarni yuklab bo\'lmadi. Sahifani qayta yuklang.</div>';
+    console.error(err);
+  });
+}
+
+// ---- lock screen ----
+const PIN_KEY = 'avtotest_bilet_unlocked';
+const CORRECT_PIN = '4444';
+const lockScreen = document.getElementById('lockScreen');
+const pinInput = document.getElementById('pinInput');
+const pinErr = document.getElementById('pinErr');
+
+function tryUnlock(){
+  if (pinInput.value === CORRECT_PIN) {
+    pinErr.textContent = '';
+    lockScreen.classList.add('hidden');
+    localStorage.setItem(PIN_KEY, '1');
+    boot();
+  } else {
+    pinErr.textContent = "Kod noto'g'ri";
+    pinInput.classList.remove('shake');
+    void pinInput.offsetWidth;
+    pinInput.classList.add('shake');
+    pinInput.value = '';
+  }
+}
+document.getElementById('pinSubmit').addEventListener('click', tryUnlock);
+pinInput.addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
+
+if (localStorage.getItem(PIN_KEY) === '1') {
+  lockScreen.classList.add('hidden');
+  boot();
+} else {
+  pinInput.focus();
+}
+</script>
+</body>
+</html>
