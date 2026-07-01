@@ -155,6 +155,24 @@ button{font-family:inherit}
 .explain-inner{padding:14px 16px;font-size:13.5px;color:var(--muted);line-height:1.5;display:flex;gap:10px}
 .explain-inner .ii{flex:none;color:var(--cyan)}
 
+.nav-grid{display:flex;flex-wrap:wrap;gap:8px;padding:14px;justify-content:center}
+.nav-dot{width:34px;height:34px;border-radius:10px;border:1.5px solid var(--border);background:rgba(255,255,255,.03);
+  color:var(--muted);font-family:'Orbitron';font-weight:700;font-size:12px;display:grid;place-items:center;
+  cursor:pointer;transition:.15s;flex:none}
+.nav-dot:hover{border-color:var(--cyan)}
+.nav-dot.current{border-color:var(--cyan);color:var(--text);box-shadow:var(--glow-cyan);background:rgba(242,199,91,.12)}
+.nav-dot.correct{background:var(--green);border-color:var(--green);color:#04210f}
+.nav-dot.wrong{background:var(--red);border-color:var(--red);color:#2a020a}
+
+.quiz-controls{display:flex;gap:10px}
+.ctrl-btn{flex:1;padding:14px;border-radius:14px;cursor:pointer;font-family:'Orbitron';font-weight:700;
+  font-size:12.5px;letter-spacing:.04em;color:var(--text);background:transparent;border-width:1.5px}
+.ctrl-btn:hover{border-color:var(--cyan);box-shadow:var(--glow-cyan)}
+.ctrl-btn:disabled{opacity:.35;cursor:default;box-shadow:none;border-color:var(--border)}
+.finish-btn{flex:none;padding:14px 20px;border:none;border-radius:14px;cursor:pointer;font-family:'Orbitron';
+  font-weight:700;font-size:12.5px;letter-spacing:.04em;color:#2a020a;
+  background:linear-gradient(90deg,var(--red),#ff6b8a);box-shadow:0 0 16px rgba(255,59,92,.4)}
+
 .next-zone{display:flex;align-items:center;gap:12px;margin-top:2px}
 .next-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:10px;padding:15px;border:none;
   border-radius:16px;cursor:pointer;font-family:'Orbitron';font-weight:700;letter-spacing:.05em;font-size:13.5px;
@@ -302,7 +320,15 @@ footer b{color:var(--cyan)}
 
     <div class="explain glass" id="explain"><div class="explain-inner"><span class="ii">ℹ️</span><span id="explainText"></span></div></div>
 
-    <div class="next-zone">
+    <div class="nav-grid" id="navGrid"></div>
+
+    <div class="quiz-controls" id="quizControls">
+      <button class="ctrl-btn glass" id="btnPrev">‹ Oldingi</button>
+      <button class="ctrl-btn glass" id="btnNext">Keyingi ›</button>
+      <button class="finish-btn" id="btnFinish">Yakunlash</button>
+    </div>
+
+    <div class="next-zone" id="nextZone">
       <button class="next-btn" id="nextBtn"><div class="next-fill" id="nextFill"></div><span id="nextLabel">Keyingi savol ⏭</span></button>
     </div>
   </div>
@@ -346,7 +372,7 @@ let QUESTIONS = [];
 let BY_ID = {};
 let state = null;
 
-let current = { mode:null, order:[], pos:0, correct:0, wrong:0 }; // active session buffer
+let current = { mode:null, order:[], pos:0, answers:{}, correct:0, wrong:0 }; // active session buffer
 let answered = false;
 let advanceTimer = null;
 
@@ -397,41 +423,27 @@ function renderHome(){
 
 function startSeq(){
   if (!state.seqOrder) state.seqOrder = QUESTIONS.map(q=>q.id);
-  current = { mode:'seq', order: state.seqOrder, pos: state.seqIdx||0, correct:0, wrong:0 };
+  current = { mode:'seq', order: state.seqOrder, pos: state.seqIdx||0, answers:{}, correct:0, wrong:0 };
   nextQuestion();
 }
 function startReview(){
   const ids = (state.wrongIds||[]).slice();
   if (!ids.length) return renderHome();
-  current = { mode:'review', order: ids, pos:0, correct:0, wrong:0 };
-  nextQuestion();
+  current = { mode:'review', order: ids, pos:0, answers:{} };
+  renderGridQuestion();
 }
 function startBilet(size){
-  current = { mode:'bilet', order: shuffledIds(size), pos:0, correct:0, wrong:0 };
-  nextQuestion();
+  current = { mode:'bilet', order: shuffledIds(size), pos:0, answers:{} };
+  renderGridQuestion();
 }
 
 function finishSession(){
-  if (current.mode === 'seq' || current.mode === 'review') {
-    saveState();
-    show('view-home');
-    renderHome();
-    return;
-  }
-  // bilet -> show result screen
-  const total = current.correct + current.wrong;
-  const pct = total ? Math.round((current.correct/total)*100) : 0;
-  document.getElementById('resPct').textContent = pct + '%';
-  document.getElementById('resCorrect').textContent = current.correct;
-  document.getElementById('resWrong').textContent = current.wrong;
-  let msg = 'Yana mashq qiling!';
-  if (pct >= 95) msg = "A'lo! Imtihonga tayyorsiz 🏆";
-  else if (pct >= 80) msg = 'Zo\'r natija! 💪';
-  else if (pct >= 60) msg = 'Yomon emas, davom eting';
-  document.getElementById('resMsg').textContent = msg;
   saveState();
-  show('view-result');
+  show('view-home');
+  renderHome();
 }
+
+// ---- seq mode: single question, auto-advance ----
 
 function nextQuestion(){
   answered = false;
@@ -442,25 +454,14 @@ function nextQuestion(){
   const q = BY_ID[current.order[current.pos]];
   const total = current.order.length;
 
-  const badgeText = current.mode === 'seq' ? 'KETMA-KET'
-    : current.mode === 'review' ? 'XATOLAR'
-    : `BILET ${total}`;
-  document.getElementById('quizBadge').textContent = badgeText;
+  document.getElementById('quizBadge').textContent = 'KETMA-KET';
   document.getElementById('quizPos').textContent = `${current.pos+1}/${total}`;
   document.getElementById('quizProgress').style.width = `${(current.pos/total)*100}%`;
+  document.getElementById('navGrid').style.display = 'none';
+  document.getElementById('quizControls').style.display = 'none';
+  document.getElementById('nextZone').style.display = 'flex';
 
-  const imgWrap = document.getElementById('qImageWrap');
-  const img = document.getElementById('qImage');
-  if (q.image) {
-    img.onerror = () => imgWrap.classList.add('hidden');
-    img.onload = () => imgWrap.classList.remove('hidden');
-    img.src = q.image;
-    imgWrap.classList.remove('hidden');
-  } else {
-    imgWrap.classList.add('hidden');
-    img.src = '';
-  }
-
+  renderImage(q);
   document.getElementById('qText').textContent = q.text;
 
   const answersEl = document.getElementById('answers');
@@ -469,7 +470,7 @@ function nextQuestion(){
     const card = document.createElement('div');
     card.className = 'ans-card glass';
     card.innerHTML = `<div class="letter">${LETTERS[i]}</div><div class="atext">${a.text}</div><div class="mark"></div>`;
-    card.addEventListener('click', () => selectAnswer(q, a.id, card));
+    card.addEventListener('click', () => selectAnswer(q, a.id));
     answersEl.appendChild(card);
   });
 
@@ -482,7 +483,7 @@ function nextQuestion(){
   show('view-quiz');
 }
 
-function selectAnswer(q, ansId, cardEl){
+function selectAnswer(q, ansId){
   if (answered) return;
   answered = true;
   const isCorrect = ansId === q.correct_id;
@@ -500,19 +501,13 @@ function selectAnswer(q, ansId, cardEl){
 
   const wrongIds = state.wrongIds || (state.wrongIds = []);
   if (isCorrect) {
-    current.correct++;
-    if (current.mode !== 'bilet') state.correct++;
-    if (current.mode === 'review') {
-      const idx = wrongIds.indexOf(q.id);
-      if (idx !== -1) wrongIds.splice(idx, 1);
-    }
+    state.correct++;
   } else {
-    current.wrong++;
-    if (current.mode !== 'bilet') state.wrong++;
+    state.wrong++;
     if (!wrongIds.includes(q.id)) wrongIds.push(q.id);
   }
 
-  if (current.mode === 'seq') state.seqIdx = current.pos + 1;
+  state.seqIdx = current.pos + 1;
   saveState();
 
   const nb = document.getElementById('nextBtn');
@@ -526,6 +521,142 @@ function selectAnswer(q, ansId, cardEl){
   nb.onclick = () => { clearTimeout(advanceTimer); nf.style.transition='none'; advance(); };
   advanceTimer = setTimeout(advance, 2000);
 }
+
+// ---- bilet / review mode: numbered navigator, free navigation, manual finish ----
+
+function renderImage(q){
+  const imgWrap = document.getElementById('qImageWrap');
+  const img = document.getElementById('qImage');
+  if (q.image) {
+    img.onerror = () => imgWrap.classList.add('hidden');
+    img.onload = () => imgWrap.classList.remove('hidden');
+    img.src = q.image;
+    imgWrap.classList.remove('hidden');
+  } else {
+    imgWrap.classList.add('hidden');
+    img.src = '';
+  }
+}
+
+function renderNavGrid(){
+  const grid = document.getElementById('navGrid');
+  grid.innerHTML = '';
+  current.order.forEach((qid, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'nav-dot';
+    dot.textContent = i + 1;
+    const ansId = current.answers[i];
+    if (ansId != null) {
+      const q = BY_ID[qid];
+      dot.classList.add(ansId === q.correct_id ? 'correct' : 'wrong');
+    }
+    if (i === current.pos) dot.classList.add('current');
+    dot.addEventListener('click', () => { current.pos = i; renderGridQuestion(); });
+    grid.appendChild(dot);
+  });
+}
+
+function renderGridQuestion(){
+  clearTimeout(advanceTimer);
+  const total = current.order.length;
+  const pos = current.pos;
+  const q = BY_ID[current.order[pos]];
+
+  document.getElementById('quizBadge').textContent = current.mode === 'review' ? 'XATOLAR' : `BILET ${total}`;
+  document.getElementById('quizPos').textContent = `${pos+1}/${total}`;
+  document.getElementById('quizProgress').style.width = `${((pos+1)/total)*100}%`;
+  document.getElementById('navGrid').style.display = 'flex';
+  document.getElementById('quizControls').style.display = 'flex';
+  document.getElementById('nextZone').style.display = 'none';
+
+  renderImage(q);
+  document.getElementById('qText').textContent = q.text;
+
+  const priorAnswerId = current.answers[pos];
+  const answersEl = document.getElementById('answers');
+  answersEl.innerHTML = '';
+  q.answers.forEach((a, i) => {
+    const card = document.createElement('div');
+    card.className = 'ans-card glass';
+    card.innerHTML = `<div class="letter">${LETTERS[i]}</div><div class="atext">${a.text}</div><div class="mark"></div>`;
+    if (priorAnswerId != null) {
+      card.classList.add('locked');
+      if (a.id === q.correct_id) card.classList.add('correct');
+      else if (a.id === priorAnswerId) card.classList.add('wrong');
+      else card.classList.add('dim');
+    } else {
+      card.addEventListener('click', () => selectGridAnswer(q, a.id));
+    }
+    answersEl.appendChild(card);
+  });
+
+  const explain = document.getElementById('explain');
+  if (priorAnswerId != null && q.explanation) {
+    explain.classList.add('show');
+    document.getElementById('explainText').textContent = q.explanation;
+  } else {
+    explain.classList.remove('show');
+  }
+
+  document.getElementById('btnPrev').disabled = pos === 0;
+  document.getElementById('btnNext').disabled = pos === total - 1;
+
+  renderNavGrid();
+  show('view-quiz');
+}
+
+function selectGridAnswer(q, ansId){
+  if (current.answers[current.pos] != null) return;
+  current.answers[current.pos] = ansId;
+
+  const isCorrect = ansId === q.correct_id;
+  const wrongIds = state.wrongIds || (state.wrongIds = []);
+  if (isCorrect) {
+    if (current.mode !== 'bilet') state.correct++;
+    if (current.mode === 'review') {
+      const idx = wrongIds.indexOf(q.id);
+      if (idx !== -1) wrongIds.splice(idx, 1);
+    }
+  } else {
+    if (current.mode !== 'bilet') state.wrong++;
+    if (!wrongIds.includes(q.id)) wrongIds.push(q.id);
+  }
+  saveState();
+  renderGridQuestion();
+}
+
+function finishGridSession(){
+  if (current.mode === 'review') return finishSession();
+
+  let correct = 0, wrong = 0, answeredCount = 0;
+  current.order.forEach((qid, i) => {
+    const ansId = current.answers[i];
+    if (ansId == null) return;
+    answeredCount++;
+    const q = BY_ID[qid];
+    if (ansId === q.correct_id) correct++; else wrong++;
+  });
+  const total = answeredCount || 1;
+  const pct = Math.round((correct / total) * 100);
+  document.getElementById('resPct').textContent = pct + '%';
+  document.getElementById('resCorrect').textContent = correct;
+  document.getElementById('resWrong').textContent = wrong;
+  let msg = 'Yana mashq qiling!';
+  if (pct >= 95) msg = "A'lo! Imtihonga tayyorsiz 🏆";
+  else if (pct >= 80) msg = "Zo'r natija! 💪";
+  else if (pct >= 60) msg = 'Yomon emas, davom eting';
+  document.getElementById('resMsg').textContent = msg;
+  saveState();
+  show('view-result');
+}
+
+document.getElementById('btnPrev').addEventListener('click', () => {
+  if (current.pos > 0) { current.pos--; renderGridQuestion(); }
+});
+document.getElementById('btnNext').addEventListener('click', () => {
+  if (current.pos < current.order.length - 1) { current.pos++; renderGridQuestion(); }
+});
+document.getElementById('btnFinish').addEventListener('click', finishGridSession);
 
 // ---- wiring ----
 document.getElementById('btnSeq').addEventListener('click', startSeq);
